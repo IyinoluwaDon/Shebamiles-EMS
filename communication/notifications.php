@@ -1,18 +1,18 @@
 <?php
 session_start();
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit();
 }
 
 // Database connection check
-if (!$db_connection) {
-    header('Location: dashboard.php?db=missing');
+if (!(new Database())->getConnection()) {
+    header('Location: ../dashboard.php?db=missing');
     exit();
 }
 
@@ -35,13 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success_msg = 'All notifications marked as read!';
         } elseif ($action === 'mark_read' && isset($_POST['notification_id'])) {
             // Mark single notification as read
-            $query = "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?";
+            $query = "UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND user_id = ?";
             $stmt = $db->conn->prepare($query);
             $stmt->execute([$_POST['notification_id'], $user_id]);
             $success_msg = 'Notification marked as read!';
         } elseif ($action === 'delete' && isset($_POST['notification_id'])) {
             // Delete notification
-            $query = "DELETE FROM notifications WHERE id = ? AND user_id = ?";
+            $query = "DELETE FROM notifications WHERE notification_id = ? AND user_id = ?";
             $stmt = $db->conn->prepare($query);
             $stmt->execute([$_POST['notification_id'], $user_id]);
             $success_msg = 'Notification deleted!';
@@ -89,9 +89,9 @@ try {
     $unread_count = $result['unread'] ?? 0;
     
     // Get paginated notifications
-    $query = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $query = "SELECT *, notification_id AS id FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT " . (int)$per_page . " OFFSET " . (int)$offset;
     $stmt = $db->conn->prepare($query);
-    $stmt->execute([$user_id, $per_page, $offset]);
+    $stmt->execute([$user_id]);
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error_msg = 'Failed to load notifications: ' . $e->getMessage();
@@ -106,7 +106,7 @@ $total_pages = ceil($total_notifications / $per_page);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .notifications-header {
             display: flex;
@@ -402,8 +402,8 @@ $total_pages = ceil($total_notifications / $per_page);
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="notifications-header">
@@ -477,7 +477,7 @@ $total_pages = ceil($total_notifications / $per_page);
                                 </span>
                                 <span class="notification-type"><?php echo ucfirst($notification['type']); ?></span>
                                 <?php if ($notification['link']): ?>
-                                    <a href="<?php echo htmlspecialchars($notification['link']); ?>" style="color: #FF6B35; text-decoration: none; font-weight: 600;">
+                                    <a href="<?php echo htmlspecialchars(preg_match('#^(https?:)?//|^/#', $notification['link']) ? $notification['link'] : appUrl($notification['link'])); ?>" style="color: #FF6B35; text-decoration: none; font-weight: 600;">
                                         View Details →
                                     </a>
                                 <?php endif; ?>

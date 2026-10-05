@@ -6,8 +6,8 @@
 // WORKFLOW: Display profile → Edit personal details → Change password
 
 // STEP 1: Include auth and helpers, require login
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 requireLogin();  // Redirect if not authenticated
 
 // STEP 2: Initialize database connection
@@ -16,7 +16,7 @@ $conn = $db->getConnection();
 
 // STEP 3: Check database connection
 if ($conn === null) {
-    header('Location: login.php?db=missing');
+    header('Location: ../login.php?db=missing');
     exit();
 }
 
@@ -134,21 +134,21 @@ if ($employee) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Shebamiles EMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="topbar">
                 <h2>My Profile</h2>
                 <div class="topbar-actions">
-                    <a href="dashboard.php" class="btn btn-sm btn-outline-orange">
+                    <a href="../dashboard.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -339,6 +339,6 @@ if ($employee) {
         </main>
     </div>
     
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 requirePermission('view_performance');
 
@@ -142,12 +142,12 @@ $user = getCurrentUser();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Performance Reviews - Shebamiles EMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="topbar">
@@ -156,7 +156,7 @@ $user = getCurrentUser();
                     <button onclick="showAddModal()" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus"></i> Add Review
                     </button>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="../account/logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -517,6 +517,6 @@ $user = getCurrentUser();
         });
     </script>
     
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 </body>
 </html>

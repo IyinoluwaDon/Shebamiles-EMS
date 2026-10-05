@@ -7,9 +7,9 @@
 
 // STEP 1: Start session and include config/auth/helpers
 session_start();
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 // STEP 2: Require login and admin permission
 requireLogin();  // Redirect if not authenticated
@@ -19,8 +19,8 @@ $success_msg = '';
 $error_msg = '';
 
 // STEP 3: Check database connection
-if (!$db_connection) {
-    header('Location: dashboard.php?db=missing');
+if (!(new Database())->getConnection()) {
+    header('Location: ../dashboard.php?db=missing');
     exit();
 }
 
@@ -109,7 +109,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .settings-container {
             display: grid;
@@ -316,8 +316,8 @@ try {
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="header">

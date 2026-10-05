@@ -4,7 +4,7 @@
 // This page is called when user clicks "Logout" button
 
 // STEP 1: Include authentication functions/helpers
-require_once '../includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // STEP 2: Call logout() function which:
 //   - Unsets all session variables ($_SESSION)

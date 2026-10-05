@@ -27,42 +27,37 @@ shebamiles-ems/
 │   └── upgrade_schema.sql        # Schema upgrade migrations
 ├── includes/                     # Core PHP libraries & utilities
 │   ├── auth.php                  # Authentication functions & session management
-│   ├── config.php                # Database configuration & PDO connection
+│   ├── config.php                # Database configuration, PDO connection, BASE_URL
 │   ├── helpers.php               # Helper functions (settings, logging, etc.)
 │   ├── badge.php                 # Shebamiles branding badge component
 │   ├── notification-header.php   # Notification display component
 │   └── sidebar.php               # Navigation sidebar component
-├── php/                          # Additional backend scripts
-│   └── logout.php                # Logout handler
-├── assets/                       # Static assets (images, etc.)
-├── [Core Pages - Root Directory]
-│   ├── index.php                 # Home/Landing page
-│   ├── login.php                 # User login page
-│   ├── dashboard.php             # Main dashboard with analytics
+├── index.php                     # Redirects to login
+├── login.php                     # User login page
+├── dashboard.php                 # Main dashboard with analytics
+├── hr/
 │   ├── employees.php             # Employee list & CRUD
 │   ├── employee-details.php      # Individual employee profile
 │   ├── departments.php           # Department management
-│   ├── attendance.php            # Attendance tracking & marking
-│   ├── leaves.php                # Leave request management
 │   ├── payroll.php               # Payroll processing & records
 │   ├── performance.php           # Performance reviews
-│   ├── notifications.php         # Notification center
+│   └── documents.php             # Document management
+├── attendance/
+│   ├── attendance.php            # Attendance tracking & marking
+│   ├── leaves.php                # Leave request management
+│   └── holiday-calendar.php      # Holiday management
+├── communication/
 │   ├── announcements.php         # Company announcements
+│   └── notifications.php         # Notification center
+├── admin/
 │   ├── users.php                 # User account management (Admin)
-│   ├── documents.php             # Document management
-│   ├── holiday-calendar.php      # Holiday management
-│   ├── activity-log.php          # System activity logging
 │   ├── settings.php              # System configuration
+│   └── activity-log.php          # System activity logging
+├── account/
 │   ├── profile.php               # User profile management
-│   └── [Documentation Files]
-│       ├── README.md             # Project overview & installation
-│       ├── ARCHITECTURE.md       # This file
-│       ├── DATABASE.md           # Database schema documentation
-│       ├── API_REFERENCE.md      # PHP functions & workflows
-│       ├── AUTHENTICATION.md     # Auth system documentation
-│       ├── FEATURES.md           # Detailed feature documentation
-│       ├── RBAC_IMPLEMENTATION.md # Role-based access control
-│       └── BADGE_CUSTOMIZATION.md # Badge component customization
+│   └── logout.php                # Logout handler
+├── README.md                     # Project overview & installation
+└── docs/                         # ARCHITECTURE, DATABASE, RBAC_QUICK_REFERENCE
 ```
 
 ## Application Flow

@@ -235,7 +235,7 @@ function getRecentActivity($limit = 50, $userId = null) {
         // STEP 3: Add LIMIT and ORDER BY
         // ORDER BY created_at DESC: Most recent first
         // LIMIT: Prevent returning millions of rows (e.g., limit to 50)
-        $query .= " ORDER BY al.created_at DESC LIMIT ?";
+        $query .= " ORDER BY al.created_at DESC LIMIT " . (int)$limit;
         
         // STEP 4: Prepare statement once (same for both cases)
         $stmt = $conn->prepare($query);
@@ -244,11 +244,10 @@ function getRecentActivity($limit = 50, $userId = null) {
         if ($userId) {
             // Case 1: Filtering by user - pass userId and limit
             // [$userId, $limit] -> replaces both ? in query
-            $stmt->execute([$userId, $limit]);
+            $stmt->execute([$userId]);
         } else {
             // Case 2: No filter - pass only limit
-            // [$limit] -> replaces the ? in LIMIT clause
-            $stmt->execute([$limit]);
+            $stmt->execute();
         }
         
         // STEP 6: Return all matching rows
@@ -292,8 +291,8 @@ function getUpcomingHolidays($limit = 5) {
         $stmt = $conn->prepare("SELECT * FROM holidays 
                                WHERE holiday_date >= CURDATE() 
                                ORDER BY holiday_date ASC 
-                               LIMIT ?");
-        $stmt->execute([$limit]);
+                               LIMIT " . (int)$limit);
+        $stmt->execute();
         return $stmt->fetchAll();
     } catch(PDOException $e) {
         return [];
@@ -403,10 +402,10 @@ function getUserNotifications($userId, $limit = 10, $unreadOnly = false) {
         if ($unreadOnly) {
             $query .= " AND is_read = 0";
         }
-        $query .= " ORDER BY created_at DESC LIMIT ?";
+        $query .= " ORDER BY created_at DESC LIMIT " . (int)$limit;
         
         $stmt = $conn->prepare($query);
-        $stmt->execute([$userId, $limit]);
+        $stmt->execute([$userId]);
         return $stmt->fetchAll();
     } catch(PDOException $e) {
         return [];

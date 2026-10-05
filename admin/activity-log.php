@@ -1,15 +1,15 @@
 <?php
 session_start();
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 requireLogin();
 requirePermission('view_activity_log');
 
 // Database connection check
-if (!$db_connection) {
-    header('Location: dashboard.php?db=missing');
+if (!(new Database())->getConnection()) {
+    header('Location: ../dashboard.php?db=missing');
     exit();
 }
 
@@ -40,7 +40,7 @@ try {
     
     if (!empty($user_ids)) {
         $placeholders = str_repeat('?,', count($user_ids) - 1) . '?';
-        $query = "SELECT user_id, full_name FROM users WHERE user_id IN ($placeholders)";
+        $query = "SELECT u.user_id, COALESCE(NULLIF(TRIM(CONCAT(e.first_name, ' ', e.last_name)), ''), u.username) AS full_name FROM users u LEFT JOIN employees e ON e.user_id = u.user_id WHERE u.user_id IN ($placeholders)";
         $stmt = $db->conn->prepare($query);
         $stmt->execute($user_ids);
         $users_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -89,8 +89,9 @@ try {
     $total_logs = $result['total'] ?? 0;
     
     // Get paginated activity logs
-    $query = "SELECT a.*, u.full_name FROM activity_log a 
+    $query = "SELECT a.*, COALESCE(NULLIF(TRIM(CONCAT(e.first_name, ' ', e.last_name)), ''), u.username) AS full_name FROM activity_log a 
               LEFT JOIN users u ON a.user_id = u.user_id 
+              LEFT JOIN employees e ON e.user_id = u.user_id
               WHERE 1=1";
     
     if ($filter_user) {
@@ -109,11 +110,7 @@ try {
         $query .= " AND DATE(a.created_at) <= ?";
     }
     
-    $query .= " ORDER BY a.created_at DESC LIMIT ? OFFSET ?";
-    
-    // Re-add pagination parameters
-    $params[] = $per_page;
-    $params[] = $offset;
+    $query .= " ORDER BY a.created_at DESC LIMIT " . (int)$per_page . " OFFSET " . (int)$offset;
     
     $stmt = $db->conn->prepare($query);
     $stmt->execute($params);
@@ -165,7 +162,7 @@ function getEntityIcon($entity) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activity Log - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .filter-section {
             background: white;
@@ -404,8 +401,8 @@ function getEntityIcon($entity) {
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="header">

@@ -14,7 +14,7 @@ $user = getCurrentUser();
 <aside class="sidebar">
     <!-- SIDEBAR HEADER: Logo/branding -->
     <div class="sidebar-header">
-        <a href="dashboard.php" class="sidebar-brand">
+        <a href="<?php echo BASE_URL; ?>/dashboard.php" class="sidebar-brand">
             Shebamiles
             <small>EMS</small>
         </a>
@@ -25,7 +25,7 @@ $user = getCurrentUser();
         <!-- DASHBOARD LINK (All Users) -->
         <!-- Always visible - shows overview and statistics -->
         <li>
-            <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
@@ -35,7 +35,7 @@ $user = getCurrentUser();
         <!-- Admins see all employees, Employees see directory only -->
         <?php if (hasPermission('view_employees')): ?>
         <li>
-            <a href="employees.php" class="<?php echo $currentPage === 'employees.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/hr/employees.php" class="<?php echo $currentPage === 'employees.php' ? 'active' : ''; ?>">
                 <i class="fas fa-users"></i>
                 <span>Employees</span>
             </a>
@@ -46,7 +46,7 @@ $user = getCurrentUser();
         <!-- View company departments and structure -->
         <?php if (hasPermission('view_departments')): ?>
         <li>
-            <a href="departments.php" class="<?php echo $currentPage === 'departments.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/hr/departments.php" class="<?php echo $currentPage === 'departments.php' ? 'active' : ''; ?>">
                 <i class="fas fa-building"></i>
                 <span>Departments</span>
             </a>
@@ -57,7 +57,7 @@ $user = getCurrentUser();
         <!-- Mark/view daily attendance records -->
         <?php if (hasPermission('view_attendance')): ?>
         <li>
-            <a href="attendance.php" class="<?php echo $currentPage === 'attendance.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/attendance/attendance.php" class="<?php echo $currentPage === 'attendance.php' ? 'active' : ''; ?>">
                 <i class="fas fa-clock"></i>
                 <span>Attendance</span>
             </a>
@@ -68,7 +68,7 @@ $user = getCurrentUser();
         <!-- Submit, view, and approve leave requests -->
         <?php if (hasPermission('view_leaves')): ?>
         <li>
-            <a href="leaves.php" class="<?php echo $currentPage === 'leaves.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/attendance/leaves.php" class="<?php echo $currentPage === 'leaves.php' ? 'active' : ''; ?>">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Leave Requests</span>
             </a>
@@ -79,7 +79,7 @@ $user = getCurrentUser();
         <!-- Upload and manage employee documents -->
         <?php if (hasPermission('view_documents')): ?>
         <li>
-            <a href="documents.php" class="<?php echo $currentPage === 'documents.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/hr/documents.php" class="<?php echo $currentPage === 'documents.php' ? 'active' : ''; ?>">
                 <i class="fas fa-file"></i>
                 <span>Documents</span>
             </a>
@@ -89,7 +89,7 @@ $user = getCurrentUser();
         <!-- ANNOUNCEMENTS LINK (All Users) -->
         <!-- View company-wide announcements and news -->
         <li>
-            <a href="announcements.php" class="<?php echo $currentPage === 'announcements.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/communication/announcements.php" class="<?php echo $currentPage === 'announcements.php' ? 'active' : ''; ?>">
                 <i class="fas fa-bullhorn"></i>
                 <span>Announcements</span>
             </a>
@@ -99,7 +99,7 @@ $user = getCurrentUser();
         <!-- View company holidays and non-working days -->
         <?php if (hasPermission('view_holidays')): ?>
         <li>
-            <a href="holiday-calendar.php" class="<?php echo $currentPage === 'holiday-calendar.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/attendance/holiday-calendar.php" class="<?php echo $currentPage === 'holiday-calendar.php' ? 'active' : ''; ?>">
                 <i class="fas fa-calendar-check"></i>
                 <span>Holiday Calendar</span>
             </a>
@@ -119,7 +119,7 @@ $user = getCurrentUser();
         <!-- Generate and manage payroll records -->
         <?php if (hasPermission('view_payroll')): ?>
         <li>
-            <a href="payroll.php" class="<?php echo $currentPage === 'payroll.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/hr/payroll.php" class="<?php echo $currentPage === 'payroll.php' ? 'active' : ''; ?>">
                 <i class="fas fa-money-bill-wave"></i>
                 <span>Payroll</span>
             </a>
@@ -130,7 +130,7 @@ $user = getCurrentUser();
         <!-- Create and manage employee performance reviews -->
         <?php if (hasPermission('view_performance')): ?>
         <li>
-            <a href="performance.php" class="<?php echo $currentPage === 'performance.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/hr/performance.php" class="<?php echo $currentPage === 'performance.php' ? 'active' : ''; ?>">
                 <i class="fas fa-chart-line"></i>
                 <span>Performance</span>
             </a>
@@ -141,7 +141,7 @@ $user = getCurrentUser();
         <!-- Create and manage user accounts -->
         <?php if (hasPermission('view_users')): ?>
         <li>
-            <a href="users.php" class="<?php echo $currentPage === 'users.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/admin/users.php" class="<?php echo $currentPage === 'users.php' ? 'active' : ''; ?>">
                 <i class="fas fa-user-shield"></i>
                 <span>User Management</span>
             </a>
@@ -152,7 +152,7 @@ $user = getCurrentUser();
         <!-- Configure company settings and preferences -->
         <?php if (hasPermission('view_settings')): ?>
         <li>
-            <a href="settings.php" class="<?php echo $currentPage === 'settings.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/admin/settings.php" class="<?php echo $currentPage === 'settings.php' ? 'active' : ''; ?>">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
@@ -163,7 +163,7 @@ $user = getCurrentUser();
         <!-- View audit trail of all system actions -->
         <?php if (hasPermission('view_activity_log')): ?>
         <li>
-            <a href="activity-log.php" class="<?php echo $currentPage === 'activity-log.php' ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/admin/activity-log.php" class="<?php echo $currentPage === 'activity-log.php' ? 'active' : ''; ?>">
                 <i class="fas fa-history"></i>
                 <span>Activity Log</span>
             </a>
@@ -187,7 +187,7 @@ $user = getCurrentUser();
             <!-- User's role (Admin, Manager, Employee) -->
             <p><?php echo getRoleDisplayName($user['role']); ?></p>
             <!-- Link to user's profile page -->
-            <a href="profile.php" style="font-size: 0.75rem; color: rgba(255,255,255,0.8); text-decoration: none; margin-top: 0.25rem; display: inline-block;">
+            <a href="<?php echo BASE_URL; ?>/account/profile.php" style="font-size: 0.75rem; color: rgba(255,255,255,0.8); text-decoration: none; margin-top: 0.25rem; display: inline-block;">
                 <i class="fas fa-user-circle"></i> View Profile
             </a>
         </div>

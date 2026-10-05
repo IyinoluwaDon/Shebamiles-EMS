@@ -5,7 +5,7 @@
 // WORKFLOW: Display table → Search/Filter → Add Modal → Submit → Database → Refresh table
 
 // STEP 1: Include authentication functions and require user to be logged in with permission
-require_once 'includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireLogin();  // Redirect to login if not authenticated
 requirePermission('view_employees');  // Redirect if user lacks 'view_employees' permission
 
@@ -161,12 +161,12 @@ $user = getCurrentUser();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employees - Shebamiles EMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="topbar">
@@ -177,7 +177,7 @@ $user = getCurrentUser();
                         <i class="fas fa-plus"></i> Add Employee
                     </button>
                     <?php endif; ?>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="../account/logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -454,6 +454,6 @@ $user = getCurrentUser();
         }
     </script>
     
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 </body>
 </html>

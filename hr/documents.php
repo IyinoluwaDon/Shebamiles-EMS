@@ -1,7 +1,7 @@
 <?php
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 requireLogin();
 requirePermission('view_documents');
@@ -13,7 +13,8 @@ $error_msg = '';
 // Allowed file types and max size
 $allowed_types = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'jpg', 'jpeg', 'png', 'gif'];
 $max_file_size = 10 * 1024 * 1024; // 10MB
-$upload_dir = 'uploads/documents/';
+$upload_rel = 'uploads/documents/';                      // path stored in DB (relative to project root)
+$upload_dir = dirname(__DIR__) . '/' . $upload_rel;     // absolute filesystem path
 
 // Create upload directory if it doesn't exist
 if (!is_dir($upload_dir)) {
@@ -42,26 +43,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['document_file'])) {
         
         // Create unique filename
         $unique_name = uniqid('doc_') . '.' . $file_ext;
-        $file_path = $upload_dir . $unique_name;
+        $file_path = $upload_rel . $unique_name;
         
         // Move uploaded file
-        if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+        if (!move_uploaded_file($file['tmp_name'], $upload_dir . $unique_name)) {
             throw new Exception('Failed to move uploaded file');
         }
         
         // Save to database
         $db = new Database();
-        $query = "INSERT INTO documents (title, description, file_path, file_name, file_size, file_type, upload_by, created_at) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        $current_user = getCurrentUser();
+        if (empty($current_user['employee_id'])) {
+            @unlink($upload_dir . $unique_name);
+            throw new Exception('Your account is not linked to an employee record.');
+        }
+        $doc_title = trim($_POST['document_title'] ?? '');
+        if ($doc_title === '') {
+            $doc_title = pathinfo($file['name'], PATHINFO_FILENAME);
+        }
+        $query = "INSERT INTO documents (employee_id, document_type, document_name, file_path, file_size, uploaded_by, notes) 
+                  VALUES (?, 'other', ?, ?, ?, ?, ?)";
         $stmt = $db->conn->prepare($query);
         $stmt->execute([
-            $_POST['document_title'] ?? 'Untitled Document',
-            $_POST['document_description'] ?? '',
+            $current_user['employee_id'],
+            $doc_title,
             $file_path,
-            $file['name'],
             $file_size,
-            $file_ext,
-            $user_id
+            $user_id,
+            $_POST['document_description'] ?? ''
         ]);
         
         logActivity($user_id, 'UPLOAD_DOCUMENT', 'documents', $db->conn->lastInsertId(), 
@@ -81,24 +90,24 @@ if (isset($_GET['delete']) && isset($_GET['token'])) {
     } else {
         try {
             $db = new Database();
-            $query = "SELECT * FROM documents WHERE id = ? AND upload_by = ?";
+            $query = "SELECT * FROM documents WHERE document_id = ? AND uploaded_by = ?";
             $stmt = $db->conn->prepare($query);
             $stmt->execute([$_GET['delete'], $user_id]);
             $doc = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($doc) {
             // Delete file
-            if (file_exists($doc['file_path'])) {
-                unlink($doc['file_path']);
+            if (file_exists(dirname(__DIR__) . '/' . $doc['file_path'])) {
+                unlink(dirname(__DIR__) . '/' . $doc['file_path']);
             }
             
             // Delete from database
-            $query = "DELETE FROM documents WHERE id = ? AND upload_by = ?";
+            $query = "DELETE FROM documents WHERE document_id = ? AND uploaded_by = ?";
             $stmt = $db->conn->prepare($query);
             $stmt->execute([$_GET['delete'], $user_id]);
             
             logActivity($user_id, 'DELETE_DOCUMENT', 'documents', $_GET['delete'], 
-                       'Deleted document: ' . $doc['file_name']);
+                       'Deleted document: ' . $doc['document_name']);
             
             $success_msg = 'Document deleted successfully!';
         }
@@ -123,33 +132,26 @@ $total_docs = 0;
 try {
     $db = new Database();
     
-    // Build query based on user role
-    if ($is_admin) {
-        // Admins see all documents
-        $query = "SELECT COUNT(*) as total FROM documents";
-        $stmt = $db->conn->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $total_docs = $result['total'] ?? 0;
-        
-        $query = "SELECT d.*, u.full_name FROM documents d 
-                  LEFT JOIN users u ON d.upload_by = u.user_id
-                  ORDER BY d.created_at DESC LIMIT ? OFFSET ?";
-        $stmt = $db->conn->prepare($query);
-        $stmt->execute([$per_page, $offset]);
-    } else {
-        // Regular users see only their documents
-        $query = "SELECT COUNT(*) as total FROM documents WHERE upload_by = ?";
-        $stmt = $db->conn->prepare($query);
-        $stmt->execute([$user_id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $total_docs = $result['total'] ?? 0;
-        
-        $query = "SELECT * FROM documents WHERE upload_by = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        $stmt = $db->conn->prepare($query);
-        $stmt->execute([$user_id, $per_page, $offset]);
-    }
-    
+    // Column aliases keep the template field names (id, title, description, ...)
+    $doc_cols = "d.document_id AS id, d.document_name AS title, d.notes AS description,
+                 d.file_path, d.file_size, d.uploaded_by AS upload_by, d.upload_date AS created_at,
+                 LOWER(SUBSTRING_INDEX(d.file_path, '.', -1)) AS file_type,
+                 CONCAT(d.document_name, '.', SUBSTRING_INDEX(d.file_path, '.', -1)) AS file_name,
+                 COALESCE(NULLIF(TRIM(CONCAT(e.first_name, ' ', e.last_name)), ''), u.username) AS full_name";
+    $doc_from = "FROM documents d
+                 LEFT JOIN users u ON d.uploaded_by = u.user_id
+                 LEFT JOIN employees e ON e.user_id = u.user_id";
+    $doc_where = $is_admin ? "" : "WHERE d.uploaded_by = ?";
+    $doc_params = $is_admin ? [] : [$user_id];
+
+    $stmt = $db->conn->prepare("SELECT COUNT(*) as total FROM documents d $doc_where");
+    $stmt->execute($doc_params);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_docs = $result['total'] ?? 0;
+
+    $stmt = $db->conn->prepare("SELECT $doc_cols $doc_from $doc_where
+                                ORDER BY d.upload_date DESC LIMIT " . (int)$per_page . " OFFSET " . (int)$offset);
+    $stmt->execute($doc_params);
     $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $error_msg = 'Failed to load documents: ' . $e->getMessage();
@@ -188,7 +190,7 @@ function formatFileSize($bytes) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Management - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .documents-container {
             padding: 20px 0;
@@ -487,8 +489,8 @@ function formatFileSize($bytes) {
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="header">
@@ -568,7 +570,7 @@ function formatFileSize($bytes) {
                                 <?php endif; ?>
                             </div>
                             <div class="document-actions">
-                                <a href="<?php echo htmlspecialchars($doc['file_path']); ?>" 
+                                <a href="<?php echo htmlspecialchars(appUrl($doc['file_path'])); ?>" 
                                    download class="document-btn document-btn-download">
                                     ⬇️ Download
                                 </a>

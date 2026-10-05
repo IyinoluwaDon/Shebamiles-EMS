@@ -4,10 +4,31 @@
  */
 
 // Database credentials
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'shebamiles_ems_new');
+// Defaults suit a local XAMPP/MySQL setup. On a server, set the environment
+// variables DB_HOST, DB_PORT, DB_USER, DB_PASS and DB_NAME instead of editing this file.
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+define('DB_NAME', getenv('DB_NAME') ?: 'shebamiles_ems_new');
+
+// BASE_URL: web path of the project root (e.g. '' or '/shebamiles-ems').
+// Detected automatically so links work from any subfolder and any install location.
+if (!defined('BASE_URL')) {
+    $rootFs   = str_replace('\\', '/', (string) realpath(dirname(__DIR__)));
+    $scriptFs = isset($_SERVER['SCRIPT_FILENAME']) ? str_replace('\\', '/', (string) realpath(dirname($_SERVER['SCRIPT_FILENAME']))) : $rootFs;
+    $urlDir   = isset($_SERVER['SCRIPT_NAME']) ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') : '';
+    $relDir   = trim(substr($scriptFs, strlen($rootFs)), '/');
+    if ($relDir !== '' && substr($urlDir, -strlen('/' . $relDir)) === '/' . $relDir) {
+        $urlDir = substr($urlDir, 0, -strlen('/' . $relDir));
+    }
+    define('BASE_URL', $urlDir);
+}
+
+// Build a URL from a project-root-relative path, e.g. appUrl('hr/employees.php')
+function appUrl($path) {
+    return BASE_URL . '/' . ltrim($path, '/');
+}
 
 // Create database connection
 class Database {
@@ -15,7 +36,7 @@ class Database {
     private $user = DB_USER;
     private $pass = DB_PASS;
     private $dbname = DB_NAME;
-    private $conn;
+    public $conn;
     private $error;
 
     // CONSTRUCTOR: Called when new Database() is instantiated
@@ -34,7 +55,7 @@ class Database {
             // BUILD DSN (Data Source Name) for PDO connection
             // Format: mysql:host=localhost;dbname=database_name;charset=utf8mb4
             // charset=utf8mb4 ensures proper Unicode character support
-            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
+            $dsn = 'mysql:host=' . $this->host . (DB_PORT !== '' ? ';port=' . DB_PORT : '') . ';dbname=' . $this->dbname . ';charset=utf8mb4';
             
             // SET PDO OPTIONS for security and consistency
             // ATTR_ERRMODE=EXCEPTION: Throw exceptions on errors (don't suppress)

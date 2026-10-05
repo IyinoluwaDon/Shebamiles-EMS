@@ -307,7 +307,7 @@ if (!hasPermission('view_all_items')) {
 
 For RBAC issues:
 1. Check this quick reference
-2. Review RBAC_IMPLEMENTATION_COMPLETE.md
+2. Review the permission matrix above and `includes/auth.php`
 3. Check includes/auth.php for permission definitions
 4. Verify permission names in error messages
 

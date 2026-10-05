@@ -1,7 +1,7 @@
 <?php
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 requireLogin();
 requirePermission('view_announcements');
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('create_announcement'
         $content = $_POST['announcement_content'] ?? '';
         $priority = $_POST['priority'] ?? 'normal';
         $target_audience = $_POST['target_audience'] ?? 'all';
-        $expire_date = $_POST['expire_date'] ?? null;
+        $expire_date = !empty($_POST['expire_date']) ? $_POST['expire_date'] : null;
         
         if (empty($title) || empty($content)) {
             throw new Exception('Title and content are required');
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('create_announcement'
 if (isset($_GET['delete']) && hasPermission('delete_announcement')) {
     try {
         $db = new Database();
-        $query = "DELETE FROM announcements WHERE id = ?";
+        $query = "DELETE FROM announcements WHERE announcement_id = ?";
         $stmt = $db->conn->prepare($query);
         $stmt->execute([$_GET['delete']]);
         
@@ -68,7 +68,9 @@ try {
     $db = new Database();
     
     // For non-admins, only show non-expired announcements
-    $where = "WHERE (expire_date IS NULL OR expire_date > CURDATE())";
+    // Roles are singular (manager) but the audience values are plural (managers)
+    $audience = ['admin' => 'admins', 'manager' => 'managers', 'employee' => 'employees'][$_SESSION['role']] ?? 'all';
+    $where = "WHERE is_published = 1 AND (expire_date IS NULL OR expire_date >= CURDATE())";
     if (!$is_admin) {
         $where .= " AND (target_audience = 'all' OR target_audience = ?)";
     }
@@ -77,7 +79,7 @@ try {
     $stmt = $db->conn->prepare($query);
     
     if (!$is_admin) {
-        $stmt->execute([$_SESSION['role']]);
+        $stmt->execute([$audience]);
     } else {
         $stmt->execute();
     }
@@ -86,17 +88,20 @@ try {
     $total_announcements = $result['total'] ?? 0;
     
     // Get announcements with user info
-    $query = "SELECT a.*, u.full_name FROM announcements a 
-              LEFT JOIN users u ON a.created_by = u.user_id 
+    $query = "SELECT a.*, a.announcement_id AS id,
+                     COALESCE(NULLIF(TRIM(CONCAT(e.first_name, ' ', e.last_name)), ''), u.username) AS full_name
+              FROM announcements a
+              LEFT JOIN users u ON a.created_by = u.user_id
+              LEFT JOIN employees e ON e.user_id = u.user_id
               $where
-              ORDER BY a.created_at DESC LIMIT ? OFFSET ?";
+              ORDER BY a.created_at DESC LIMIT " . (int)$per_page . " OFFSET " . (int)$offset;
     
     $stmt = $db->conn->prepare($query);
     
     if (!$is_admin) {
-        $stmt->execute([$_SESSION['role'], $per_page, $offset]);
+        $stmt->execute([$audience]);
     } else {
-        $stmt->execute([$per_page, $offset]);
+        $stmt->execute();
     }
     
     $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -121,7 +126,7 @@ function getPriorityBadge($priority) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Announcements - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .announcements-container {
             padding: 20px 0;
@@ -408,8 +413,8 @@ function getPriorityBadge($priority) {
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="header">

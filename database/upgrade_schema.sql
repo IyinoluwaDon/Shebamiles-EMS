@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
   `user_id` int(11) NOT NULL,
   `action` varchar(100) NOT NULL,
   `entity_type` varchar(50) DEFAULT NULL,
-  `entity_id` int(11) DEFAULT NULL,
+  `entity_id` varchar(50) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
@@ -152,138 +152,49 @@ CREATE TABLE IF NOT EXISTS `timesheet` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Update: notifications table (Enhanced structure)
+-- Update: notifications table (adds link + read_at)
+-- Works on MySQL and MariaDB and is safe to run more than once.
 -- --------------------------------------------------------
 
-ALTER TABLE `notifications` 
-  ADD COLUMN IF NOT EXISTS `link` varchar(255) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `read_at` timestamp NULL DEFAULT NULL,
-  ADD INDEX IF NOT EXISTS `link` (`link`);
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `notifications` ADD COLUMN `link` varchar(255) DEFAULT NULL',
+  'SELECT 1') FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'notifications' AND COLUMN_NAME = 'link');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `notifications` ADD COLUMN `read_at` timestamp NULL DEFAULT NULL',
+  'SELECT 1') FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'notifications' AND COLUMN_NAME = 'read_at');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- Activity log entity ids can be text (e.g. 'all'), so widen the column on older installs
+ALTER TABLE `activity_log` MODIFY `entity_id` varchar(50) DEFAULT NULL;
 
 -- --------------------------------------------------------
--- Foreign key constraints
+-- Foreign key constraints (each added only if missing)
 -- --------------------------------------------------------
 
-ALTER TABLE `documents`
-  ADD CONSTRAINT `documents_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `documents_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT;
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `documents` ADD CONSTRAINT `documents_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE',
+  'SELECT 1') FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'documents' AND CONSTRAINT_NAME = 'documents_ibfk_1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
-ALTER TABLE `activity_log`
-  ADD CONSTRAINT `activity_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `documents` ADD CONSTRAINT `documents_ibfk_2` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT',
+  'SELECT 1') FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'documents' AND CONSTRAINT_NAME = 'documents_ibfk_2');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
-ALTER TABLE `leave_balance`
-  ADD CONSTRAINT `leave_balance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE;
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `activity_log` ADD CONSTRAINT `activity_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE',
+  'SELECT 1') FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'activity_log' AND CONSTRAINT_NAME = 'activity_log_ibfk_1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
-ALTER TABLE `salary_history`
-  ADD CONSTRAINT `salary_history_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `salary_history_ibfk_2` FOREIGN KEY (`changed_by`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT;
-
-ALTER TABLE `announcements`
-  ADD CONSTRAINT `announcements_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT,
-  ADD CONSTRAINT `announcements_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE CASCADE;
-
-ALTER TABLE `timesheet`
-  ADD CONSTRAINT `timesheet_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `timesheet_ibfk_2` FOREIGN KEY (`approved_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
-
--- --------------------------------------------------------
--- Insert default company settings
--- --------------------------------------------------------
-
-INSERT INTO `company_settings` (`setting_key`, `setting_value`, `setting_group`) VALUES
-('company_name', 'Shebamiles', 'general'),
-('company_email', 'info@shebamiles.com', 'general'),
-('company_phone', '+234-000-0000', 'general'),
-('company_address', 'Lagos, Nigeria', 'general'),
-('working_hours_start', '09:00', 'attendance'),
-('working_hours_end', '17:00', 'attendance'),
-('late_threshold_minutes', '15', 'attendance'),
-('sick_leave_days', '10', 'leave'),
-('vacation_leave_days', '20', 'leave'),
-('personal_leave_days', '5', 'leave'),
-('enable_email_notifications', '1', 'notifications'),
-('theme', 'light', 'appearance'),
-('date_format', 'Y-m-d', 'general'),
-('currency_symbol', '₦', 'payroll')
-ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
-
--- --------------------------------------------------------
--- Insert sample holidays for 2026
--- --------------------------------------------------------
-
-INSERT INTO `holidays` (`holiday_name`, `holiday_date`, `is_recurring`, `description`) VALUES
-('New Year Day', '2026-01-01', 1, 'New Year Celebration'),
-('Good Friday', '2026-04-03', 0, 'Easter Holiday'),
-('Easter Monday', '2026-04-06', 0, 'Easter Holiday'),
-('Workers Day', '2026-05-01', 1, 'International Workers Day'),
-('Democracy Day', '2026-06-12', 1, 'Democracy Day'),
-('Eid al-Fitr', '2026-07-06', 0, 'Islamic Holiday'),
-('Independence Day', '2026-10-01', 1, 'Nigeria Independence Day'),
-('Christmas Day', '2026-12-25', 1, 'Christmas Celebration'),
-('Boxing Day', '2026-12-26', 1, 'Day after Christmas')
-ON DUPLICATE KEY UPDATE holiday_name = VALUES(holiday_name);
-
--- --------------------------------------------------------
--- Initialize leave balance for existing employees
--- --------------------------------------------------------
-
-INSERT INTO `leave_balance` (`employee_id`, `leave_type`, `year`, `total_days`, `used_days`)
-SELECT 
-    e.employee_id,
-    'vacation' as leave_type,
-    2026 as year,
-    20 as total_days,
-    0 as used_days
-FROM employees e
-WHERE NOT EXISTS (
-    SELECT 1 FROM leave_balance lb 
-    WHERE lb.employee_id = e.employee_id 
-    AND lb.leave_type = 'vacation' 
-    AND lb.year = 2026
-);
-
-INSERT INTO `leave_balance` (`employee_id`, `leave_type`, `year`, `total_days`, `used_days`)
-SELECT 
-    e.employee_id,
-    'sick' as leave_type,
-    2026 as year,
-    10 as total_days,
-    0 as used_days
-FROM employees e
-WHERE NOT EXISTS (
-    SELECT 1 FROM leave_balance lb 
-    WHERE lb.employee_id = e.employee_id 
-    AND lb.leave_type = 'sick' 
-    AND lb.year = 2026
-);
-
-INSERT INTO `leave_balance` (`employee_id`, `leave_type`, `year`, `total_days`, `used_days`)
-SELECT 
-    e.employee_id,
-    'personal' as leave_type,
-    2026 as year,
-    5 as total_days,
-    0 as used_days
-FROM employees e
-WHERE NOT EXISTS (
-    SELECT 1 FROM leave_balance lb 
-    WHERE lb.employee_id = e.employee_id 
-    AND lb.leave_type = 'personal' 
-    AND lb.year = 2026
-);
-
-COMMIT;
-
--- ========================================
--- UPGRADE COMPLETE!
--- ========================================
--- New features enabled:
--- ✓ Document Management
--- ✓ Activity Logging
--- ✓ Holiday Management
--- ✓ Leave Balance Tracking
--- ✓ Salary History
--- ✓ Company Settings
--- ✓ Announcements
--- ✓ Timesheet Tracking
--- ========================================
+SET @s = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE `leave_balance` ADD CONSTRAINT `leave_balance_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`) ON DELETE CASCADE',
+  'SELECT 1') FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'leave_balance' AND CONSTRAINT_NAME = 'leave_balance_ibfk_1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;

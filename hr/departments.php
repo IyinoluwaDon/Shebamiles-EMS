@@ -6,7 +6,7 @@
 // WORKFLOW: List departments → View employee count → Add/Delete → Manage staffing
 
 // STEP 1: Include auth and require login
-require_once 'includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireLogin();  // Redirect if not authenticated
 
 // STEP 2: Initialize database connection
@@ -89,12 +89,12 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Departments - Shebamiles EMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="topbar">
@@ -105,7 +105,7 @@ try {
                         <i class="fas fa-plus"></i> Add Department
                     </button>
                     <?php endif; ?>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="../account/logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -260,6 +260,6 @@ try {
         }
     </script>
     
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 </body>
 </html>

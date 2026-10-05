@@ -4,7 +4,7 @@
  */
 
 session_start();
-require_once 'config.php';
+require_once __DIR__ . '/config.php';
 
 // Check if user is logged in
 function isLoggedIn() {
@@ -19,7 +19,7 @@ function hasRole($role) {
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: login.php');
+        header('Location: ' . BASE_URL . '/login.php');
         exit();
     }
 }
@@ -28,7 +28,7 @@ function requireLogin() {
 function requireAdmin() {
     requireLogin();
     if (!hasRole('admin')) {
-        header('Location: dashboard.php');
+        header('Location: ' . BASE_URL . '/dashboard.php');
         exit();
     }
 }
@@ -102,7 +102,7 @@ function login($username, $password) {
 function logout() {
     session_unset();
     session_destroy();
-    header('Location: ../login.php');
+    header('Location: ' . BASE_URL . '/login.php');
     exit();
 }
 
@@ -366,7 +366,7 @@ function requirePermission($permission) {
             <div class="deny-box">
                 <h1>🚫 Access Denied</h1>
                 <p>You do not have permission to access this resource.</p>
-                <a href="dashboard.php">→ Back to Dashboard</a>
+                <a href="' . BASE_URL . '/dashboard.php">→ Back to Dashboard</a>
             </div>
         </body>
         </html>';

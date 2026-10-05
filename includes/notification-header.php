@@ -4,7 +4,7 @@
 // This component is included in main pages to show real-time notification status
 
 // Include helper functions for notification operations
-require_once 'helpers.php';
+require_once __DIR__ . '/helpers.php';
 
 // GET UNREAD NOTIFICATION COUNT for current user
 // Only attempt if user is logged in (session exists)
@@ -23,7 +23,7 @@ if (isset($_SESSION['user_id'])) {
 <!-- NOTIFICATION BELL HEADER ELEMENT -->
 <div class="notification-header">
     <!-- Link to notifications page -->
-    <a href="notifications.php" class="notification-bell">
+    <a href="<?php echo BASE_URL; ?>/communication/notifications.php" class="notification-bell">
         <!-- Bell icon from Font Awesome -->
         <i class="fas fa-bell"></i>
         

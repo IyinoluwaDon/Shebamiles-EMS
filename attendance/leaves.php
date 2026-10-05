@@ -6,7 +6,7 @@
 // WORKFLOW: Submit request → Admin review → Approve/Reject → Track status
 
 // STEP 1: Include auth and require login with permission
-require_once 'includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 requireLogin();  // Redirect if not authenticated
 requirePermission('view_leaves');  // Redirect if lacks leave permission
 
@@ -134,12 +134,12 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leave Requests - Shebamiles EMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-wrapper">
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="topbar">
@@ -148,7 +148,7 @@ try {
                     <button onclick="showRequestModal()" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus"></i> Request Leave
                     </button>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="../account/logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -387,6 +387,6 @@ try {
         }
     </script>
     
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 </body>
 </html>

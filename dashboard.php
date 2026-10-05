@@ -304,7 +304,7 @@ foreach ($weeklyAttendance as $att) {
                 <h2>📊 Dashboard</h2>
                 <div class="topbar-actions">
                     <?php include 'includes/notification-header.php'; ?>
-                    <a href="php/logout.php" class="btn btn-sm btn-outline-orange">
+                    <a href="account/logout.php" class="btn btn-sm btn-outline-orange">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -394,7 +394,7 @@ foreach ($weeklyAttendance as $att) {
                 <div class="table-container">
                     <div class="table-header">
                         <h3>Recent Employees</h3>
-                        <a href="employees.php" class="btn btn-sm btn-primary">View All</a>
+                        <a href="hr/employees.php" class="btn btn-sm btn-primary">View All</a>
                     </div>
                     <table>
                         <thead>
@@ -431,7 +431,7 @@ foreach ($weeklyAttendance as $att) {
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="employee-details.php?id=<?php echo $emp['employee_id']; ?>" class="btn-icon" title="View Details">
+                                        <a href="hr/employee-details.php?id=<?php echo $emp['employee_id']; ?>" class="btn-icon" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>

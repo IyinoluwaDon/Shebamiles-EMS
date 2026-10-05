@@ -63,7 +63,12 @@ A modern, fully-functional Employee Management System built with PHP, MySQL, HTM
 - Copy and paste the contents of `database/shebamiles_db.sql`
 - Click "Go"
 
-#### 4. Configure Database Connection (if needed)
+#### 4. Import the Feature Upgrade
+- In phpMyAdmin, select the `shebamiles_ems_new` database
+- Go to the "Import" tab and choose `database/upgrade_schema.sql`
+- Click "Go" (adds documents, settings, holidays, announcements, activity log and related tables)
+
+#### 5. Configure Database Connection (if needed)
 The default settings should work with XAMPP. If you need to change them:
 - Open `includes/config.php`
 - Update the following if necessary:
@@ -74,7 +79,7 @@ The default settings should work with XAMPP. If you need to change them:
   define('DB_NAME', 'shebamiles_ems_new');
   ```
 
-#### 5. Access the System
+#### 6. Access the System
 - Open your web browser
 - Go to: `http://localhost/shebamiles-ems`
 - You will be redirected to the login page
@@ -133,31 +138,44 @@ The default settings should work with XAMPP. If you need to change them:
 
 ```
 shebamiles-ems/
-├── css/
-│   └── style.css              # Main stylesheet
-├── js/
-├── php/
-│   └── logout.php             # Logout handler
-├── includes/
-│   ├── config.php             # Database configuration
-│   ├── auth.php               # Authentication functions
+├── index.php                  # Redirects to login
+├── login.php
+├── dashboard.php
+├── hr/                        # People and pay
+│   ├── employees.php
+│   ├── employee-details.php
+│   ├── departments.php
+│   ├── payroll.php
+│   ├── performance.php
+│   └── documents.php
+├── attendance/                # Time and leave
+│   ├── attendance.php
+│   ├── leaves.php
+│   └── holiday-calendar.php
+├── communication/
+│   ├── announcements.php
+│   └── notifications.php
+├── admin/                     # Admin-only tools
+│   ├── users.php
+│   ├── settings.php
+│   └── activity-log.php
+├── account/
+│   ├── profile.php
+│   └── logout.php
+├── includes/                  # Shared code
+│   ├── config.php             # DB config and BASE_URL detection
+│   ├── auth.php               # Authentication and permissions
+│   ├── helpers.php            # Shared helper functions
 │   ├── sidebar.php            # Sidebar component
-│   └── badge.php              # Floating brand badge
+│   ├── badge.php              # Floating brand badge
+│   └── notification-header.php
+├── css/
+│   └── style.css
 ├── database/
-│   └── shebamiles_db.sql      # Database schema
-├── assets/
-│   └── images/
-├── login.php                  # Login page
-├── dashboard.php              # Main dashboard
-├── employees.php              # Employee management
-├── departments.php            # Department management
-├── attendance.php             # Attendance tracking
-├── leaves.php                 # Leave management
-├── payroll.php                # Payroll management
-├── performance.php            # Performance reviews
-├── users.php                  # User management
-├── employee-details.php       # Employee profile view
-└── README.md                  # This file
+│   ├── shebamiles_db.sql      # Base schema + default admin
+│   └── upgrade_schema.sql     # Extra tables and seed data
+├── docs/                      # Architecture, database, RBAC notes
+└── README.md
 ```
 
 ## Database Schema
@@ -280,3 +298,13 @@ If you encounter any issues:
 **Remember to change the default admin password after installation!**
 
 Enjoy using Shebamiles Employee Management System! 🎉
+
+## Deployment Notes
+
+- Database settings can come from environment variables (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`). Without them the app uses the local XAMPP defaults.
+- `database/upgrade_schema.sql` works on both MySQL and MariaDB and is safe to run more than once.
+- Vercel has no built-in PHP runtime. It needs a community PHP runtime, and its serverless filesystem is temporary, so document uploads and file-based sessions will not persist. For a PHP app like this, a host with persistent storage (Railway, Render, Fly.io, or a cPanel/VPS host) is a safer fit. A hosted MySQL database is required either way, because a local one is not reachable from the internet.
+
+## Documentation
+
+Extra notes live in `docs/`: `ARCHITECTURE.md`, `DATABASE.md` and `RBAC_QUICK_REFERENCE.md`.

@@ -1,18 +1,18 @@
 <?php
 session_start();
-require_once 'includes/config.php';
-require_once 'includes/auth.php';
-require_once 'includes/helpers.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/helpers.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit();
 }
 
 // Database connection check
-if (!$db_connection) {
-    header('Location: dashboard.php?db=missing');
+if (!(new Database())->getConnection()) {
+    header('Location: ../dashboard.php?db=missing');
     exit();
 }
 
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_admin && isset($_POST['action']
 if (isset($_GET['delete']) && $is_admin) {
     try {
         $db = new Database();
-        $query = "DELETE FROM holidays WHERE id = ?";
+        $query = "DELETE FROM holidays WHERE holiday_id = ?";
         $stmt = $db->conn->prepare($query);
         $stmt->execute([$_GET['delete']]);
         
@@ -73,7 +73,7 @@ try {
     $db = new Database();
     
     // Get holidays for the selected year (including recurring holidays)
-    $query = "SELECT * FROM holidays 
+    $query = "SELECT *, holiday_id AS id FROM holidays 
               WHERE YEAR(holiday_date) = ? OR is_recurring = 1
               ORDER BY MONTH(holiday_date), DAY(holiday_date)";
     $stmt = $db->conn->prepare($query);
@@ -117,7 +117,7 @@ $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holiday Calendar - Shebamiles EMS</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         .calendar-header {
             display: flex;
@@ -473,8 +473,8 @@ $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     </style>
 </head>
 <body>
-    <?php include 'includes/sidebar.php'; ?>
-    <?php include 'includes/badge.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/badge.php'; ?>
 
     <div class="main-content">
         <div class="header">
