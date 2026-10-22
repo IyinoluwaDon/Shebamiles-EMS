@@ -25,7 +25,7 @@ if ($db->getConnection() === null) {
 
 // HANDLE LOGIN FORM SUBMISSION
 // Process POST request when user clicks "Sign In" button
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // EXTRACT AND SANITIZE INPUT
     // Get username and password from form
     $username = sanitize($_POST['username'] ?? '');
@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <!-- LOGIN FORM -->
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <!-- USERNAME INPUT -->
                 <div class="form-group">
                     <label for="username">Username</label>

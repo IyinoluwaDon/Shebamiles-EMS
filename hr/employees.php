@@ -74,9 +74,9 @@ if ($conn !== null && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['act
 // STEP 6: HANDLE DELETE REQUEST
 // Triggered by delete action from query parameter (e.g., ?delete=5)
 // PERMISSION: Requires 'delete_employee' permission
-if ($conn !== null && isset($_GET['delete']) && hasPermission('delete_employee')) {
+if ($conn !== null && isset($_POST['delete']) && hasPermission('delete_employee')) {
     try {
-        $employeeId = $_GET['delete'];
+        $employeeId = $_POST['delete'];
         
         // STEP 6a: Fetch user_id for this employee (needed for cascading delete)
         // Users table has cascade delete rules, so deleted user cascades to employees
@@ -279,12 +279,14 @@ $user = getCurrentUser();
                                         </a>
                                         <?php endif; ?>
                                         <?php if (hasPermission('delete_employee')): ?>
-                                        <a href="?delete=<?php echo $emp['employee_id']; ?>" 
-                                           class="btn-icon" 
+                                        <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $emp['employee_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" class="btn-icon" 
                                            title="Delete"
                                            onclick="return confirm('Are you sure you want to delete this employee?')">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button></form>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -305,6 +307,7 @@ $user = getCurrentUser();
                 <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
             </div>
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="add_employee">
                 <div class="modal-body">
                     <div class="form-row">

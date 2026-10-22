@@ -289,6 +289,7 @@ try {
                 <button class="modal-close" onclick="closeModal('markModal')">&times;</button>
             </div>
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="mark_attendance">
                 <div class="modal-body">
                     <div class="form-group">

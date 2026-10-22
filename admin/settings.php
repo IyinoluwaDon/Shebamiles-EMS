@@ -26,7 +26,7 @@ if (!(new Database())->getConnection()) {
 
 // STEP 4: HANDLE SETTINGS UPDATE (POST Request)
 // Process form submissions from different settings sections
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $db = new Database();
         
@@ -359,6 +359,7 @@ try {
                         Update your company's basic information that appears across the system.
                     </div>
                     <form method="POST" class="settings-form">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="setting_action" value="company_info">
                         
                         <div class="form-group">
@@ -417,6 +418,7 @@ try {
                         Set standard work hours and late arrival thresholds for your organization.
                     </div>
                     <form method="POST" class="settings-form">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="setting_action" value="work_hours">
                         
                         <div class="form-group-row">
@@ -451,6 +453,7 @@ try {
                         Define the number of leave days available for each leave type per year.
                     </div>
                     <form method="POST" class="settings-form">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="setting_action" value="leave_policies">
                         
                         <div class="form-group">
@@ -484,6 +487,7 @@ try {
                         Configure SMTP settings for sending automated emails. Leave empty to disable email notifications.
                     </div>
                     <form method="POST" class="settings-form">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="setting_action" value="email_settings">
                         
                         <div class="form-group">

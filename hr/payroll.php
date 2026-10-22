@@ -83,10 +83,10 @@ if ($conn !== null && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['act
 
 // STEP 5: HANDLE DELETE REQUEST
 // Delete a payroll record from database
-if ($conn !== null && isset($_GET['delete'])) {
+if ($conn !== null && isset($_POST['delete'])) {
     try {
         $stmt = $conn->prepare("DELETE FROM payroll WHERE payroll_id = ?");
-        $stmt->execute([$_GET['delete']]);
+        $stmt->execute([$_POST['delete']]);
         $success = "Payroll record deleted successfully!";
     } catch(PDOException $e) {
         $error = "Error deleting record: " . $e->getMessage();
@@ -332,12 +332,14 @@ $user = getCurrentUser();
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     <?php endif; ?>
-                                                    <a href="?delete=<?php echo $record['payroll_id']; ?>" 
-                                                       onclick="return confirm('Are you sure you want to delete this payroll record?')" 
+                                                    <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $record['payroll_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" onclick="return confirm('Are you sure you want to delete this payroll record?')" 
                                                        class="btn-icon btn-danger" 
                                                        title="Delete">
                                                         <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    </button></form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -359,6 +361,7 @@ $user = getCurrentUser();
                 <button class="modal-close" type="button" onclick="closeModal('addModal')">&times;</button>
             </div>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="add_payroll">
                 <div class="modal-body">
                     <div class="form-group">
@@ -423,6 +426,7 @@ $user = getCurrentUser();
     
     <!-- Mark as Paid Form -->
     <form id="markPaidForm" method="POST" style="display:none;">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="action" value="update_status">
         <input type="hidden" name="status" value="paid">
         <input type="hidden" name="payroll_id" id="payroll_id_input">

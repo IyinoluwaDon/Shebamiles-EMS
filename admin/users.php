@@ -81,9 +81,9 @@ if ($conn !== null && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['act
 
 // STEP 5: HANDLE DELETE REQUEST
 // Delete user account from system
-if ($conn !== null && isset($_GET['delete'])) {
+if ($conn !== null && isset($_POST['delete'])) {
     try {
-        $userId = $_GET['delete'];
+        $userId = $_POST['delete'];
         
         // SECURITY: Prevent admin from deleting their own account
         // This keeps at least one admin in the system
@@ -365,12 +365,14 @@ $currentUser = getCurrentUser();
                                                         <i class="fas fa-key"></i>
                                                     </button>
                                                     <?php if ($user['user_id'] != $currentUser['user_id']): ?>
-                                                        <a href="?delete=<?php echo $user['user_id']; ?>" 
-                                                           onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')" 
+                                                        <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $user['user_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')" 
                                                            class="btn-icon btn-danger" 
                                                            title="Delete">
                                                             <i class="fas fa-trash"></i>
-                                                        </a>
+                                                        </button></form>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -393,6 +395,7 @@ $currentUser = getCurrentUser();
                 <button class="modal-close" type="button" onclick="closeModal('addModal')">&times;</button>
             </div>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="add_user">
                 <div class="modal-body">
                     <div class="form-group">
@@ -450,6 +453,7 @@ $currentUser = getCurrentUser();
                 <button class="modal-close" type="button" onclick="closeModal('editModal')">&times;</button>
             </div>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="update_user">
                 <input type="hidden" name="user_id" id="edit_user_id">
                 <div class="modal-body">
@@ -499,6 +503,7 @@ $currentUser = getCurrentUser();
                 <button class="modal-close" type="button" onclick="closeModal('resetPasswordModal')">&times;</button>
             </div>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="reset_password">
                 <input type="hidden" name="user_id" id="reset_user_id">
                 <div class="modal-body">

@@ -64,10 +64,10 @@ if ($conn !== null && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['act
 }
 
 // Handle delete
-if ($conn !== null && isset($_GET['delete'])) {
+if ($conn !== null && isset($_POST['delete'])) {
     try {
         $stmt = $conn->prepare("DELETE FROM performance_reviews WHERE review_id = ?");
-        $stmt->execute([$_GET['delete']]);
+        $stmt->execute([$_POST['delete']]);
         $success = "Performance review deleted successfully!";
     } catch(PDOException $e) {
         $error = "Error deleting review: " . $e->getMessage();
@@ -301,12 +301,14 @@ $user = getCurrentUser();
                                                             onclick="viewReview(this)">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    <a href="?delete=<?php echo $review['review_id']; ?>" 
-                                                       onclick="return confirm('Are you sure you want to delete this review?')" 
+                                                    <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $review['review_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" onclick="return confirm('Are you sure you want to delete this review?')" 
                                                        class="btn-icon btn-danger" 
                                                        title="Delete">
                                                         <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    </button></form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -328,6 +330,7 @@ $user = getCurrentUser();
                 <button class="modal-close" type="button" onclick="closeModal('addModal')">&times;</button>
             </div>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="add_review">
                 <div class="modal-body">
                     <div class="form-group">

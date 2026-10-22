@@ -22,7 +22,7 @@ $success_msg = '';
 $error_msg = '';
 
 // Handle holiday creation (admin only)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_admin && isset($_POST['action']) && $_POST['action'] === 'add_holiday') {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST' && $is_admin && isset($_POST['action']) && $_POST['action'] === 'add_holiday') {
     try {
         $db = new Database();
         
@@ -50,14 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_admin && isset($_POST['action']
 }
 
 // Handle holiday deletion (admin only)
-if (isset($_GET['delete']) && $is_admin) {
+if (isset($_POST['delete']) && $is_admin) {
     try {
         $db = new Database();
         $query = "DELETE FROM holidays WHERE holiday_id = ?";
         $stmt = $db->conn->prepare($query);
-        $stmt->execute([$_GET['delete']]);
+        $stmt->execute([$_POST['delete']]);
         
-        logActivity($user_id, 'DELETE_HOLIDAY', 'holidays', $_GET['delete'], 'Deleted holiday');
+        logActivity($user_id, 'DELETE_HOLIDAY', 'holidays', $_POST['delete'], 'Deleted holiday');
         
         $success_msg = 'Holiday deleted successfully!';
     } catch (PDOException $e) {
@@ -605,9 +605,11 @@ $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                             <?php endif; ?>
                             <?php if ($is_admin): ?>
                                 <div class="holiday-action">
-                                    <a href="?delete=<?php echo $holiday['id']; ?>" 
-                                       onclick="return confirm('Delete this holiday?');"
-                                       class="holiday-btn holiday-btn-delete">🗑️ Delete</a>
+                                    <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $holiday['id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" onclick="return confirm('Delete this holiday?');"
+                                       class="holiday-btn holiday-btn-delete">🗑️ Delete</button></form>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -625,6 +627,7 @@ $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                 <button class="modal-close" onclick="closeAddModal()">✕</button>
                 <h2 style="color: #FF6B35; margin-top: 0;">Add Holiday</h2>
                 <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="action" value="add_holiday">
                     
                     <div class="form-group">

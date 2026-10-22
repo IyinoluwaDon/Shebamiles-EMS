@@ -44,13 +44,13 @@ if ($conn !== null && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['act
 
 // STEP 5: HANDLE DELETE REQUEST
 // Delete a department from system (admin only)
-if ($conn !== null && isset($_GET['delete']) && hasRole('admin')) {
+if ($conn !== null && isset($_POST['delete']) && hasRole('admin')) {
     try {
         // Delete department by ID
         // NOTE: May fail if foreign key constraints prevent orphaning employees
         // Users should reassign employees before deleting department
         $stmt = $conn->prepare("DELETE FROM departments WHERE department_id = ?");
-        $stmt->execute([$_GET['delete']]);
+        $stmt->execute([$_POST['delete']]);
         $success = "Department deleted successfully!";
     } catch(PDOException $e) {
         $error = "Error deleting department: " . $e->getMessage();
@@ -145,12 +145,14 @@ try {
                             </p>
                             <?php if (hasRole('admin')): ?>
                             <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                                <a href="?delete=<?php echo $dept['department_id']; ?>" 
-                                   class="btn-icon" 
+                                <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $dept['department_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" class="btn-icon" 
                                    onclick="return confirm('Are you sure? This will unassign all employees from this department.')"
                                    title="Delete">
                                     <i class="fas fa-trash"></i>
-                                </a>
+                                </button></form>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -197,12 +199,14 @@ try {
                                     </td>
                                     <td>
                                         <?php if (hasRole('admin')): ?>
-                                        <a href="?delete=<?php echo $dept['department_id']; ?>" 
-                                           class="btn-icon" 
+                                        <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $dept['department_id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" class="btn-icon" 
                                            title="Delete"
                                            onclick="return confirm('Are you sure you want to delete this department?')">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button></form>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -223,6 +227,7 @@ try {
                 <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
             </div>
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="add_department">
                 <div class="modal-body">
                     <div class="form-group">

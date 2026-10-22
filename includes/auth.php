@@ -12,6 +12,13 @@ session_set_cookie_params([
 session_start();
 require_once __DIR__ . '/config.php';
 
+// All state-changing HTML forms must send the session-bound CSRF token.
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !verifyCSRFToken($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    exit('Invalid form token. Reload the page and try again.');
+}
+
+
 // Check if user is logged in
 function isLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['username']);

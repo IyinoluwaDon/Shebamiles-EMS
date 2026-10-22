@@ -21,7 +21,7 @@ $success_msg = '';
 $error_msg = '';
 
 // Handle notification actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $db = new Database();
         
@@ -418,12 +418,14 @@ $total_pages = ceil($total_notifications / $per_page);
             <div class="notification-actions">
                 <?php if ($unread_count > 0): ?>
                     <form method="POST" style="display: inline;">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="action" value="mark_all_read">
                         <button type="submit" class="btn-small btn-primary-small">✓ Mark All as Read</button>
                     </form>
                 <?php endif; ?>
                 <?php if ($total_notifications > 0): ?>
                     <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to clear all notifications?');">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="action" value="clear_all">
                         <button type="submit" class="btn-small btn-danger-small">🗑️ Clear All</button>
                     </form>
@@ -486,12 +488,14 @@ $total_pages = ceil($total_notifications / $per_page);
                         <div class="notification-actions-item">
                             <?php if ($is_unread): ?>
                                 <form method="POST" style="display: inline;">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="action" value="mark_read">
                                     <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
                                     <button type="submit" class="notification-btn notification-btn-read" title="Mark as read">✓ Read</button>
                                 </form>
                             <?php endif; ?>
                             <form method="POST" style="display: inline;" onsubmit="return confirm('Delete this notification?');">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="notification_id" value="<?php echo $notification['id']; ?>">
                                 <button type="submit" class="notification-btn notification-btn-delete" title="Delete notification">🗑️ Delete</button>

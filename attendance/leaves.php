@@ -295,6 +295,7 @@ try {
                 <button class="modal-close" onclick="closeModal('requestModal')">&times;</button>
             </div>
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="request_leave">
                 <div class="modal-body">
                     <div class="form-group">
@@ -342,6 +343,7 @@ try {
                 <button class="modal-close" onclick="closeModal('approvalModal')">&times;</button>
             </div>
             <form method="POST" action="">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="leave_id" id="approval_leave_id">
                 <div class="modal-body">
                     <p id="approval_employee_name" style="margin-bottom: 1rem; font-weight: 600;"></p>

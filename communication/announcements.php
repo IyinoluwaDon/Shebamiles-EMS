@@ -12,7 +12,7 @@ $success_msg = '';
 $error_msg = '';
 
 // Handle announcement creation (admin only)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('create_announcement')) {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('create_announcement')) {
     try {
         $db = new Database();
         
@@ -41,14 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && hasPermission('create_announcement'
 }
 
 // Handle announcement deletion (admin only)
-if (isset($_GET['delete']) && hasPermission('delete_announcement')) {
+if (isset($_POST['delete']) && hasPermission('delete_announcement')) {
     try {
         $db = new Database();
         $query = "DELETE FROM announcements WHERE announcement_id = ?";
         $stmt = $db->conn->prepare($query);
-        $stmt->execute([$_GET['delete']]);
+        $stmt->execute([$_POST['delete']]);
         
-        logActivity($user_id, 'DELETE_ANNOUNCEMENT', 'announcements', $_GET['delete'], 'Deleted announcement');
+        logActivity($user_id, 'DELETE_ANNOUNCEMENT', 'announcements', $_POST['delete'], 'Deleted announcement');
         
         $success_msg = 'Announcement deleted successfully!';
     } catch (PDOException $e) {
@@ -523,6 +523,7 @@ function getPriorityBadge($priority) {
             <button class="modal-close" onclick="closeCreateModal()">✕</button>
             <h2>Create Announcement</h2>
             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="form-group">
                     <label for="announcement_title">Title *</label>
                     <input type="text" id="announcement_title" name="announcement_title" required>

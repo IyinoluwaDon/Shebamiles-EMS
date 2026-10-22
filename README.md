@@ -250,11 +250,11 @@ Edit `css/style.css` and modify the CSS variables:
 
 ## Support & Credits
 
-**Developed for**: IFT 301 Group Project  
-**Company**: Shebamiles  
-**Theme**: Orange & White  
-**Version**: 1.0.0  
-**Date**: February 2026  
+**Developed for**: IFT 301 Group Project
+**Company**: Shebamiles
+**Theme**: Orange & White
+**Version**: 1.0.0
+**Date**: February 2026
 
 ## License
 
@@ -308,3 +308,10 @@ Enjoy using Shebamiles Employee Management System! 🎉
 ## Documentation
 
 Extra notes live in `docs/`: `ARCHITECTURE.md`, `DATABASE.md` and `RBAC_QUICK_REFERENCE.md`.
+
+
+## Offline checks and form security
+
+Run `php tests/auth_test.php` for CSRF-token and role-permission checks. Lint application PHP files with `php -l`. This review linted 26 files using PHP 8.4.27 with no syntax errors. Database-backed HR/payroll workflows still require a configured MySQL schema and test accounts; the offline checks do not replace those integration tests.
+
+Sessions use strict mode, HttpOnly cookies, SameSite=Lax and Secure on HTTPS. Login regenerates the session ID and CSRF token. All POST forms are checked centrally; destructive delete actions now use POST forms instead of navigable GET links. Set DB_HOST, DB_PORT, DB_USER, DB_PASS and DB_NAME for your environment. The local hostname note is excluded from Git.

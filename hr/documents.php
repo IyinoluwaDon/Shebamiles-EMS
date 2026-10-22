@@ -22,7 +22,7 @@ if (!is_dir($upload_dir)) {
 }
 
 // Handle file uploads
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['document_file'])) {
+if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['document_file'])) {
     try {
         $file = $_FILES['document_file'];
         
@@ -83,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['document_file'])) {
 }
 
 // Handle document deletion
-if (isset($_GET['delete']) && isset($_GET['token'])) {
-    // Simple token validation (should use CSRF token in production)
+if (isset($_POST['delete'])) {
+    // The central auth middleware validates the POST CSRF token.
     if (!hasPermission('delete_document')) {
         $error_msg = 'You do not have permission to delete documents.';
     } else {
@@ -92,7 +92,7 @@ if (isset($_GET['delete']) && isset($_GET['token'])) {
             $db = new Database();
             $query = "SELECT * FROM documents WHERE document_id = ? AND uploaded_by = ?";
             $stmt = $db->conn->prepare($query);
-            $stmt->execute([$_GET['delete'], $user_id]);
+            $stmt->execute([$_POST['delete'], $user_id]);
             $doc = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($doc) {
@@ -104,9 +104,9 @@ if (isset($_GET['delete']) && isset($_GET['token'])) {
             // Delete from database
             $query = "DELETE FROM documents WHERE document_id = ? AND uploaded_by = ?";
             $stmt = $db->conn->prepare($query);
-            $stmt->execute([$_GET['delete'], $user_id]);
+            $stmt->execute([$_POST['delete'], $user_id]);
             
-            logActivity($user_id, 'DELETE_DOCUMENT', 'documents', $_GET['delete'], 
+            logActivity($user_id, 'DELETE_DOCUMENT', 'documents', $_POST['delete'], 
                        'Deleted document: ' . $doc['document_name']);
             
             $success_msg = 'Document deleted successfully!';
@@ -511,6 +511,7 @@ function formatFileSize($bytes) {
             <div class="upload-section">
                 <h3>📤 Upload New Document</h3>
                 <form method="POST" enctype="multipart/form-data" class="upload-form">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="form-group">
                         <label for="document_title">Document Title</label>
                         <input type="text" id="document_title" name="document_title" 
@@ -575,11 +576,13 @@ function formatFileSize($bytes) {
                                     ⬇️ Download
                                 </a>
                                 <?php if ($doc['upload_by'] === $user_id || $is_admin): ?>
-                                    <a href="?delete=<?php echo $doc['id']; ?>&token=1" 
-                                       onclick="return confirm('Delete this document?');"
+                                    <form method="post" style="display:inline">
+<input type="hidden" name="delete" value="<?php echo $doc['id']; ?>">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
+<button type="submit" onclick="return confirm('Delete this document?');"
                                        class="document-btn document-btn-delete">
                                         🗑️ Delete
-                                    </a>
+                                    </button></form>
                                 <?php endif; ?>
                             </div>
                         </div>

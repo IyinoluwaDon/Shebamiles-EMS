@@ -200,6 +200,7 @@ if ($employee) {
                         </div>
                         <div class="card-body">
                             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="update_profile">
                                 
                                 <div class="form-group">
@@ -246,6 +247,7 @@ if ($employee) {
                         </div>
                         <div class="card-body">
                             <form method="POST">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="change_password">
                                 
                                 <div class="form-group">
