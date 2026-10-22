@@ -10,3 +10,6 @@ uploads/
 # Logs and local env
 *.log
 .env
+
+MySQL Hostname.txt
+.env

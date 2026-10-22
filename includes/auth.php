@@ -3,6 +3,12 @@
  * Authentication Functions for Shebamiles EMS
  */
 
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Lax',
+]);
 session_start();
 require_once __DIR__ . '/config.php';
 
@@ -75,6 +81,8 @@ function login($username, $password) {
         // Return: false if user not found OR password doesn't match
         if ($user && password_verify($password, $user['password'])) {
             // PASSWORD CORRECT - Set session variables for authenticated user
+            session_regenerate_id(true);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
@@ -140,7 +148,7 @@ function generateCSRFToken() {
 
 // Verify CSRF token
 function verifyCSRFToken($token) {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    return is_string($token) && $token !== '' && isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
 /**
