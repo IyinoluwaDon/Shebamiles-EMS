@@ -1,0 +1,15 @@
+MySQL Hostname
+sql211.infinityfree.com
+
+Database Name	Actions
+if0_43097338_shebamiles_ems
+
+
+MySQL Username
+if0_43097338 
+
+
+
+
+MySQL Password
+Fp5Vl9XStQK
