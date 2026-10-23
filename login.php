@@ -117,10 +117,8 @@ if (!isset($_POST['delete']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </form>
             
-            <!-- DEFAULT CREDENTIALS INFO -->
             <div style="margin-top: 1.5rem; text-align: center; color: var(--medium-gray); font-size: 0.85rem;">
-                <p><strong>Default Login:</strong></p>
-                <p>Username: <strong>admin</strong> | Password: <strong>admin123</strong></p>
+                <p>There is no default login. Ask your system administrator to create your account.</p>
             </div>
         </div>
     </div>

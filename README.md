@@ -29,7 +29,7 @@ A modern, fully-functional Employee Management System built with PHP, MySQL, HTM
 
 ### Prerequisites
 - **XAMPP** (or WAMP/LAMP) installed on your computer
-- PHP 7.4 or higher
+- PHP 8.2 or higher (verified with PHP 8.4)
 - MySQL 5.7 or higher
 - Web browser (Chrome, Firefox, Safari, Edge)
 
@@ -68,29 +68,23 @@ A modern, fully-functional Employee Management System built with PHP, MySQL, HTM
 - Go to the "Import" tab and choose `database/upgrade_schema.sql`
 - Click "Go" (adds documents, settings, holidays, announcements, activity log and related tables)
 
-#### 5. Configure Database Connection (if needed)
-The default settings should work with XAMPP. If you need to change them:
-- Open `includes/config.php`
-- Update the following if necessary:
-  ```php
-  define('DB_HOST', 'localhost');
-  define('DB_USER', 'root');
-  define('DB_PASS', ''); // Leave empty for default XAMPP
-  define('DB_NAME', 'shebamiles_ems_new');
-  ```
+#### 5. Configure the database
+For local XAMPP only, the development defaults use `localhost`, `root`, a blank password, and `shebamiles_ems_new`. For any shared or production host, provide `APP_ENV=production`, `DB_HOST`, `DB_PORT` (if required), `DB_USER`, `DB_PASS`, and `DB_NAME` through the host's environment settings. Production mode refuses missing or blank database credentials. Give the database user only the permissions this app needs; do not edit `includes/config.php` to add secrets.
 
 #### 6. Access the System
 - Open your web browser
 - Go to: `http://localhost/shebamiles-ems`
 - You will be redirected to the login page
 
-## Default Login Credentials
+## Create the first administrator
 
-### Admin Account
-- **Username**: `admin`
-- **Password**: `admin123`
+The SQL import disables its demonstration admin account. There is no shared default password. After importing the schema, set `EMS_ADMIN_USERNAME`, `EMS_ADMIN_EMAIL`, and a unique `EMS_ADMIN_PASSWORD` of at least 16 characters in the same terminal session, then run:
 
-**IMPORTANT**: Change this password after first login for security!
+```bash
+php scripts/create_admin.php
+```
+
+The command is CLI-only and refuses to run if an active administrator already exists. Remove the temporary `EMS_ADMIN_*` values immediately afterward. Never put them in source control, a `.env` file committed to Git, or a deployment log.
 
 ## Usage Guide
 
@@ -212,9 +206,9 @@ shebamiles-ems/
 - Verify database was created successfully in phpMyAdmin
 
 ### Login not working?
-- Use default credentials: `admin` / `admin123`
 - Clear browser cache and cookies
-- Check database has the users table with admin user
+- Confirm an administrator was provisioned with `php scripts/create_admin.php`
+- Check that the database contains the `users` table and the account is active
 
 ### Pages look broken?
 - Clear browser cache

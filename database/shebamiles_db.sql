@@ -198,12 +198,12 @@ ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 -- --------------------------------------------------------
--- Insert default admin user
--- Password: admin123 (hashed with password_hash)
+-- Seed the demonstration admin as inactive. Provision a fresh credential with
+-- scripts/create_admin.php before first use; the published demo password is disabled.
 -- --------------------------------------------------------
 
 INSERT INTO `users` (`username`, `password`, `email`, `role`, `status`) VALUES
-('admin', '$2y$10$DBrswwJb9zmYSwhCbptOFupIZ6050wjJJYUbjNFfCRtWM.0dqSfsO', 'admin@shebamiles.com', 'admin', 'active');
+('admin', '$2y$10$DBrswwJb9zmYSwhCbptOFupIZ6050wjJJYUbjNFfCRtWM.0dqSfsO', 'admin@shebamiles.com', 'admin', 'inactive');
 
 -- --------------------------------------------------------
 -- Insert sample departments

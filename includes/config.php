@@ -3,14 +3,32 @@
  * Database Configuration for Shebamiles EMS
  */
 
-// Database credentials
-// Defaults suit a local XAMPP/MySQL setup. On a server, set the environment
-// variables DB_HOST, DB_PORT, DB_USER, DB_PASS and DB_NAME instead of editing this file.
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_PORT', getenv('DB_PORT') ?: '');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
-define('DB_NAME', getenv('DB_NAME') ?: 'shebamiles_ems_new');
+// Local defaults support XAMPP only. Production must use explicit credentials
+// supplied by the deployment environment, never a blank root password.
+$appEnvironment = strtolower(getenv('APP_ENV') ?: 'development');
+$databaseHost = getenv('DB_HOST') ?: 'localhost';
+$databasePort = getenv('DB_PORT') ?: '';
+$databaseUser = getenv('DB_USER') ?: 'root';
+$databasePassword = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+$databaseName = getenv('DB_NAME') ?: 'shebamiles_ems_new';
+if ($appEnvironment === 'production') {
+    ini_set('display_errors', '0');
+}
+if ($appEnvironment === 'production' && (
+    getenv('DB_HOST') === false || getenv('DB_HOST') === '' ||
+    getenv('DB_USER') === false || getenv('DB_USER') === '' ||
+    getenv('DB_PASS') === false || getenv('DB_PASS') === '' ||
+    getenv('DB_NAME') === false || getenv('DB_NAME') === ''
+)) {
+    error_log('Production database credentials are required.');
+    throw new RuntimeException('Production database credentials are required.');
+}
+define('APP_ENV', $appEnvironment);
+define('DB_HOST', $databaseHost);
+define('DB_PORT', $databasePort);
+define('DB_USER', $databaseUser);
+define('DB_PASS', $databasePassword);
+define('DB_NAME', $databaseName);
 
 // BASE_URL: web path of the project root (e.g. '' or '/shebamiles-ems').
 // Detected automatically so links work from any subfolder and any install location.
